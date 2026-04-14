@@ -26,10 +26,10 @@ const Login = () => {
   const from = location.state?.from?.pathname || '/';
   
   useEffect(() => {
-    if (token && successMessage) {
+    if (successMessage) {
       setShowSuccessModal(true);
     }
-  }, [token, successMessage]);
+  }, [successMessage]);
   
   if (token && !successMessage) {
     navigate(from, { replace: true });
