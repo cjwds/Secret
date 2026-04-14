@@ -13,7 +13,7 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to="/" className="navbar-logo">社区网站</Link>
+        <Link to="/" className="navbar-logo">社区</Link>
         <div className="navbar-links">
           <Link to="/" className="navbar-link">首页</Link>
           <Link to="/recommended" className="navbar-link">推荐</Link>

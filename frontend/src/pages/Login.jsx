@@ -23,27 +23,22 @@ const Login = () => {
   const location = useLocation();
   const { isLoading, error, token } = useSelector(state => state.auth);
   
-  // 获取登录前的路径
   const from = location.state?.from?.pathname || '/';
   
-  // 处理成功消息
   useEffect(() => {
     if (token && successMessage) {
       if (successMessage === '注册成功') {
         setShowSuccessModal(true);
       } else {
-        // 登录成功，跳转到之前的页面
         navigate(from, { replace: true });
       }
     }
   }, [token, successMessage, navigate, from]);
   
-  // 如果已经登录，跳转到之前的页面
   if (token && !successMessage) {
     navigate(from, { replace: true });
   }
   
-  // 验证函数
   const validateField = (name, value) => {
     let error = '';
     
@@ -90,7 +85,6 @@ const Login = () => {
       [name]: value
     }));
     
-    // 实时验证
     if (value.trim()) {
       validateField(name, value);
     } else {
@@ -109,7 +103,6 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // 验证所有字段
     const isUsernameValid = isLogin || validateField('username', formData.username);
     const isEmailValid = validateField('email', formData.email);
     const isPasswordValid = validateField('password', formData.password);
@@ -126,9 +119,7 @@ const Login = () => {
             setSuccessMessage(response.message);
           }
         })
-        .catch(() => {
-          // 错误已经由redux处理
-        });
+        .catch(() => {});
     } else {
       dispatch(register(formData))
         .unwrap()
@@ -137,9 +128,7 @@ const Login = () => {
             setSuccessMessage(response.message);
           }
         })
-        .catch(() => {
-          // 错误已经由redux处理
-        });
+        .catch(() => {});
     }
   };
   
@@ -175,98 +164,109 @@ const Login = () => {
   };
   
   return (
-    <div className="login-container">
-      <div className="form-wrapper">
-        <div className="form-header">
-          <h1>{isLogin ? '欢迎回来' : '创建账号'}</h1>
-          <p>{isLogin ? '登录您的账号' : '注册新账号'}</p>
-        </div>
-        
-        {error && (
-          <div className="error-message">
-            {error}
-            <button onClick={() => dispatch(clearError())} className="error-close">×</button>
-          </div>
-        )}
-        
-        <form onSubmit={handleSubmit} className="auth-form">
-          {!isLogin && (
-            <div className="form-group">
-              <label htmlFor="username">用户名</label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="请设置您的用户名"
-                className={`form-input ${errors.username ? 'error' : ''}`}
-                required
-              />
-              {errors.username && (
-                <div className="error-text">{errors.username}</div>
-              )}
-            </div>
-          )}
-          
-          <div className="form-group">
-            <label htmlFor="email">{isLogin ? '账户' : '邮箱'}</label>
-            <input
-              type={isLogin ? "text" : "email"}
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              placeholder={isLogin ? "请输入用户名或邮箱" : "请输入您的邮箱地址"}
-              className={`form-input ${errors.email ? 'error' : ''}`}
-              required
-            />
-            {errors.email && (
-              <div className="error-text">{errors.email}</div>
-            )}
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="password">密码</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              placeholder={isLogin ? "请输入密码" : "请设置6-12位密码"}
-              className={`form-input ${errors.password ? 'error' : ''}`}
-              required
-            />
-            {errors.password && (
-              <div className="error-text">{errors.password}</div>
-            )}
-            {!isLogin && (
-              <div className="password-hint">密码至少包含字母和数字</div>
-            )}
-          </div>
-          
-          <button 
-            type="submit" 
-            disabled={isLoading} 
-            className="submit-button"
-          >
-            {isLoading ? (isLogin ? '登录中...' : '注册中...') : (isLogin ? '登录' : '注册')}
-          </button>
-        </form>
-        
-        <div className="form-toggle">
-          <p>{isLogin ? '还没有账号？' : '已有账号？'}</p>
-          <button onClick={toggleForm} className="toggle-button">
-            {isLogin ? '立即注册' : '立即登录'}
-          </button>
+    <div className="auth-page">
+      <div className="auth-visual">
+        <div className="auth-visual-content">
+          <h1 className="auth-visual-title">社区</h1>
+          <p className="auth-visual-subtitle">连接每一个声音</p>
         </div>
       </div>
       
-      {/* 成功弹窗 */}
+      <div className="auth-form-container">
+        <div className="auth-form-wrapper">
+          <h1 className="auth-form-logo">社区</h1>
+          <p className="auth-form-tagline">开始你的旅程</p>
+          
+          <div className="auth-form">
+            <h2 className="auth-form-title">{isLogin ? '欢迎回来' : '创建账号'}</h2>
+            <p className="auth-form-subtitle">{isLogin ? '登录你的账号' : '加入我们的社区'}</p>
+            
+            {error && (
+              <div className="error-message">
+                {error}
+                <button onClick={() => dispatch(clearError())} className="error-close">×</button>
+              </div>
+            )}
+            
+            <form onSubmit={handleSubmit}>
+              {!isLogin && (
+                <div className="form-group">
+                  <label htmlFor="username" className="form-label">用户名</label>
+                  <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="请设置您的用户名"
+                    className={`form-input ${errors.username ? 'error' : ''}`}
+                    required
+                  />
+                  {errors.username && (
+                    <div className="error-text">{errors.username}</div>
+                  )}
+                </div>
+              )}
+              
+              <div className="form-group">
+                <label htmlFor="email" className="form-label">{isLogin ? '账户' : '邮箱'}</label>
+                <input
+                  type={isLogin ? "text" : "email"}
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder={isLogin ? "请输入用户名或邮箱" : "请输入您的邮箱地址"}
+                  className={`form-input ${errors.email ? 'error' : ''}`}
+                  required
+                />
+                {errors.email && (
+                  <div className="error-text">{errors.email}</div>
+                )}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="password" className="form-label">密码</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder={isLogin ? "请输入密码" : "请设置6-12位密码"}
+                  className={`form-input ${errors.password ? 'error' : ''}`}
+                  required
+                />
+                {errors.password && (
+                  <div className="error-text">{errors.password}</div>
+                )}
+                {!isLogin && (
+                  <div className="password-hint">密码至少包含字母和数字</div>
+                )}
+              </div>
+              
+              <button 
+                type="submit" 
+                disabled={isLoading} 
+                className="submit-button"
+              >
+                {isLoading ? (isLogin ? '登录中...' : '注册中...') : (isLogin ? '登录' : '注册')}
+              </button>
+            </form>
+          </div>
+          
+          <div className="form-toggle">
+            <p>{isLogin ? '还没有账号？' : '已有账号？'}</p>
+            <button onClick={toggleForm} className="toggle-button">
+              {isLogin ? '立即注册' : '立即登录'}
+            </button>
+          </div>
+        </div>
+      </div>
+      
       {showSuccessModal && (
         <div className="modal-overlay">
           <div className="modal-content">
