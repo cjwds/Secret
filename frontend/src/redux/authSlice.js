@@ -17,8 +17,9 @@ export const login = createAsyncThunk('auth/login', async (userData, { rejectWit
 export const register = createAsyncThunk('auth/register', async (userData, { rejectWithValue }) => {
   try {
     const response = await authAPI.register(userData);
-    localStorage.setItem('token', response.data.token);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
+    // 注册成功后不自动登录，清除token和user
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     return response.data;
   } catch (error) {
     return rejectWithValue(error.response.data.message);
@@ -66,10 +67,9 @@ const authSlice = createSlice({
       state.isLoading = true;
       state.error = null;
     });
-    builder.addCase(register.fulfilled, (state, action) => {
+    builder.addCase(register.fulfilled, (state) => {
       state.isLoading = false;
-      state.user = action.payload.user;
-      state.token = action.payload.token;
+      // 注册成功后不更新user和token，保持未登录状态
     });
     builder.addCase(register.rejected, (state, action) => {
       state.isLoading = false;

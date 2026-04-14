@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { login, register, clearError } from '../redux/authSlice';
@@ -10,6 +10,8 @@ const Login = () => {
     email: '',
     password: ''
   });
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -19,8 +21,20 @@ const Login = () => {
   // 获取登录前的路径
   const from = location.state?.from?.pathname || '/';
   
+  // 处理成功消息
+  useEffect(() => {
+    if (token && successMessage) {
+      if (successMessage === '注册成功') {
+        setShowSuccessModal(true);
+      } else {
+        // 登录成功，跳转到之前的页面
+        navigate(from, { replace: true });
+      }
+    }
+  }, [token, successMessage, navigate, from]);
+  
   // 如果已经登录，跳转到之前的页面
-  if (token) {
+  if (token && !successMessage) {
     navigate(from, { replace: true });
   }
   
@@ -34,14 +48,44 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isLogin) {
-      dispatch(login({ email: formData.email, password: formData.password }));
+      dispatch(login({ email: formData.email, password: formData.password }))
+        .unwrap()
+        .then((response) => {
+          if (response.message) {
+            setSuccessMessage(response.message);
+          }
+        })
+        .catch(() => {
+          // 错误已经由redux处理
+        });
     } else {
-      dispatch(register(formData));
+      dispatch(register(formData))
+        .unwrap()
+        .then((response) => {
+          if (response.message) {
+            setSuccessMessage(response.message);
+          }
+        })
+        .catch(() => {
+          // 错误已经由redux处理
+        });
     }
   };
   
   const toggleForm = () => {
     setIsLogin(!isLogin);
+    setFormData({
+      username: '',
+      email: '',
+      password: ''
+    });
+    setSuccessMessage('');
+    setShowSuccessModal(false);
+  };
+  
+  const handleModalClose = () => {
+    setShowSuccessModal(false);
+    setIsLogin(true);
     setFormData({
       username: '',
       email: '',
@@ -73,13 +117,14 @@ const Login = () => {
           </div>
         )}
         <div className="form-group">
-          <label htmlFor="email">邮箱</label>
+          <label htmlFor="email">账户</label>
           <input
-            type="email"
+            type="text"
             id="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
+            placeholder="请输入用户名或邮箱"
             required
           />
         </div>
@@ -104,6 +149,19 @@ const Login = () => {
           {isLogin ? '立即注册' : '立即登录'}
         </button>
       </div>
+      
+      {/* 成功弹窗 */}
+      {showSuccessModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>{successMessage}</h2>
+            <p>立即登录</p>
+            <button onClick={handleModalClose} className="modal-button">
+              确定
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

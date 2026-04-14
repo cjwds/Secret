@@ -30,7 +30,7 @@ router.post('/register', async (req, res) => {
     // 生成token
     const token = jwt.sign({ id: newUser._id }, 'secret', { expiresIn: '1h' });
     
-    res.status(201).json({ user: newUser, token });
+    res.status(201).json({ user: newUser, token, message: '注册成功' });
   } catch (error) {
     res.status(500).json({ message: '服务器错误' });
   }
@@ -41,8 +41,8 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // 检查用户是否存在
-    const user = await User.findOne({ email });
+    // 检查用户是否存在（支持用户名或邮箱）
+    const user = await User.findOne({ $or: [{ email }, { username: email }] });
     if (!user) {
       return res.status(400).json({ message: '用户不存在' });
     }
@@ -56,7 +56,7 @@ router.post('/login', async (req, res) => {
     // 生成token
     const token = jwt.sign({ id: user._id }, 'secret', { expiresIn: '1h' });
     
-    res.status(200).json({ user, token });
+    res.status(200).json({ user, token, message: '登录成功' });
   } catch (error) {
     res.status(500).json({ message: '服务器错误' });
   }
