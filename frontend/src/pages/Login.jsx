@@ -108,23 +108,33 @@ const Login = () => {
     }
     
     if (isLogin) {
+      console.log('开始登录');
       dispatch(login({ email: formData.email, password: formData.password }))
         .unwrap()
-        .then((response) => {
-          if (response.message) {
-            setSuccessMessage(response.message);
+        .then((data) => {
+          console.log('登录成功，返回数据:', data);
+          if (data.message) {
+            console.log('设置成功消息:', data.message);
+            setSuccessMessage(data.message);
           }
         })
-        .catch(() => {});
+        .catch((error) => {
+          console.error('登录失败:', error);
+        });
     } else {
+      console.log('开始注册');
       dispatch(register(formData))
         .unwrap()
-        .then((response) => {
-          if (response.message) {
-            setSuccessMessage(response.message);
+        .then((data) => {
+          console.log('注册成功，返回数据:', data);
+          if (data.message) {
+            console.log('设置成功消息:', data.message);
+            setSuccessMessage(data.message);
           }
         })
-        .catch(() => {});
+        .catch((error) => {
+          console.error('注册失败:', error);
+        });
     }
   };
   
