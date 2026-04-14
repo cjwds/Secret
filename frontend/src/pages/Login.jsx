@@ -27,9 +27,13 @@ const Login = () => {
   
   useEffect(() => {
     if (token && successMessage) {
-      setShowSuccessModal(true);
+      if (successMessage === '注册成功') {
+        setShowSuccessModal(true);
+      } else {
+        navigate(from, { replace: true });
+      }
     }
-  }, [token, successMessage]);
+  }, [token, successMessage, navigate, from]);
   
   if (token && !successMessage) {
     navigate(from, { replace: true });
@@ -48,8 +52,8 @@ const Login = () => {
         break;
       case 'email':
         if (!value.trim()) {
-          error = '账户不能为空';
-        } else if (!isLogin && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = '邮箱不能为空';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           error = '请输入有效的邮箱地址';
         }
         break;
@@ -146,21 +150,17 @@ const Login = () => {
   
   const handleModalClose = () => {
     setShowSuccessModal(false);
-    if (token) {
-      navigate(from, { replace: true });
-    } else {
-      setIsLogin(true);
-      setFormData({
-        username: '',
-        email: '',
-        password: ''
-      });
-      setErrors({
-        username: '',
-        email: '',
-        password: ''
-      });
-    }
+    setIsLogin(true);
+    setFormData({
+      username: '',
+      email: '',
+      password: ''
+    });
+    setErrors({
+      username: '',
+      email: '',
+      password: ''
+    });
   };
   
   return (
@@ -272,7 +272,7 @@ const Login = () => {
           <div className="modal-content">
             <div className="modal-icon">✓</div>
             <h2>{successMessage}</h2>
-            <p>{successMessage === '注册成功' ? '立即登录' : '即将跳转...'}</p>
+            <p>立即登录</p>
             <button onClick={handleModalClose} className="modal-button">
               确定
             </button>
