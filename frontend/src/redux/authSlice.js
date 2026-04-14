@@ -9,17 +9,23 @@ export const login = createAsyncThunk('auth/login', async (userData, { rejectWit
     localStorage.setItem('user', JSON.stringify(response.data.user));
     return response.data;
   } catch (error) {
-    // 模拟登录成功，用于预览环境
+    // 模拟登录验证，用于预览环境
     if (!error.response) {
-      const mockUser = {
-        _id: '1',
-        username: userData.email.split('@')[0] || userData.email,
-        email: userData.email
-      };
-      const mockToken = 'mock-token-123';
-      localStorage.setItem('token', mockToken);
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      return { user: mockUser, token: mockToken, message: '登录成功' };
+      // 模拟用户数据库
+      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+      const user = registeredUsers.find(u => 
+        (u.email === userData.email || u.username === userData.email) && 
+        u.password === userData.password
+      );
+      
+      if (user) {
+        const mockToken = 'mock-token-123';
+        localStorage.setItem('token', mockToken);
+        localStorage.setItem('user', JSON.stringify(user));
+        return { user, token: mockToken, message: '登录成功' };
+      } else {
+        return rejectWithValue('用户不存在或密码错误');
+      }
     }
     return rejectWithValue(error.response.data.message);
   }
@@ -36,6 +42,24 @@ export const register = createAsyncThunk('auth/register', async (userData, { rej
   } catch (error) {
     // 模拟注册成功，用于预览环境
     if (!error.response) {
+      // 保存注册用户到本地存储
+      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+      const existingUser = registeredUsers.find(u => u.email === userData.email);
+      
+      if (existingUser) {
+        return rejectWithValue('用户已存在');
+      }
+      
+      const newUser = {
+        _id: Date.now().toString(),
+        username: userData.username,
+        email: userData.email,
+        password: userData.password
+      };
+      
+      registeredUsers.push(newUser);
+      localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+      
       return { message: '注册成功' };
     }
     return rejectWithValue(error.response.data.message);
