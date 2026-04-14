@@ -117,14 +117,14 @@ const Login = () => {
           </div>
         )}
         <div className="form-group">
-          <label htmlFor="email">账户</label>
+          <label htmlFor="email">{isLogin ? '账户' : '邮箱'}</label>
           <input
-            type="text"
+            type={isLogin ? "text" : "email"}
             id="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="请输入用户名或邮箱"
+            placeholder={isLogin ? "请输入用户名或邮箱" : "请输入邮箱"}
             required
           />
         </div>
