@@ -13,6 +13,7 @@ const Profile = () => {
   const [newPost, setNewPost] = useState('');
   const [newPostImage, setNewPostImage] = useState('');
   const [postImages, setPostImages] = useState([]);
+  const [showPostForm, setShowPostForm] = useState(false);
   
   const { id } = useParams();
   const currentUser = useSelector(state => state.auth.user);
@@ -166,7 +167,13 @@ const Profile = () => {
       setPosts([post, ...posts]);
       setNewPost('');
       setNewPostImage('');
+      setShowPostForm(false);
     }
+  };
+
+  // 显示发帖表单
+  const handleShowPostForm = () => {
+    setShowPostForm(true);
   };
   
   return (
@@ -418,82 +425,91 @@ const Profile = () => {
         ) : (
           <div className="empty" style={{ padding: '2rem', marginBottom: '2rem' }}>
             <div className="empty-icon">📝</div>
-            <p style={{ color: 'var(--text-muted)' }}>暂无帖子</p>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>暂无帖子</p>
+            <button 
+              onClick={handleShowPostForm} 
+              className="navbar-button"
+              style={{ padding: '0.75rem 1.5rem' }}
+            >
+              去发帖
+            </button>
           </div>
         )}
         
-        {/* 发帖功能 */}
-        <div className="post-form">
-          <div className="post-form-header">
-            <img 
-              src={user.avatar || 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=friendly%20user%20avatar&image_size=square'} 
-              alt={user.username} 
-              className="post-form-avatar" 
+        {/* 发帖功能 - 点击去发帖后显示 */}
+        {showPostForm && (
+          <div className="post-form">
+            <div className="post-form-header">
+              <img 
+                src={user.avatar || 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=friendly%20user%20avatar&image_size=square'} 
+                alt={user.username} 
+                className="post-form-avatar" 
+              />
+              <span style={{ color: 'var(--text)', fontWeight: 500 }}>{user.nickname || user.username}</span>
+            </div>
+            <textarea
+              placeholder="分享你的想法..."
+              value={newPost}
+              onChange={(e) => setNewPost(e.target.value)}
+              className="post-form-textarea"
+              rows="4"
             />
-            <span style={{ color: 'var(--text)', fontWeight: 500 }}>{user.nickname || user.username}</span>
+            <div style={{ marginBottom: '1rem' }}>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      setNewPostImage(event.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                style={{ display: 'none' }}
+                id="post-photo-upload"
+              />
+              <button 
+                onClick={() => document.getElementById('post-photo-upload').click()}
+                style={{ 
+                  padding: '0.5rem 1rem', 
+                  border: '1px solid var(--border)', 
+                  borderRadius: 'var(--radius)', 
+                  background: 'transparent',
+                  color: 'var(--text)',
+                  cursor: 'pointer'
+                }}
+              >
+                上传图片
+              </button>
+              {newPostImage && (
+                <div style={{ marginTop: '1rem' }}>
+                  <img 
+                    src={newPostImage} 
+                    alt="预览" 
+                    style={{ 
+                      maxWidth: '200px', 
+                      maxHeight: '200px', 
+                      border: '1px solid var(--border)', 
+                      borderRadius: 'var(--radius)'
+                    }} 
+                  />
+                </div>
+              )}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button 
+                onClick={handleCreatePost} 
+                className="post-button"
+                disabled={!newPost.trim()}
+              >
+                发布
+              </button>
+            </div>
           </div>
-          <textarea
-            placeholder="分享你的想法..."
-            value={newPost}
-            onChange={(e) => setNewPost(e.target.value)}
-            className="post-form-textarea"
-            rows="4"
-          />
-          <div style={{ marginBottom: '1rem' }}>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onload = (event) => {
-                    setNewPostImage(event.target.result);
-                  };
-                  reader.readAsDataURL(file);
-                }
-              }}
-              style={{ display: 'none' }}
-              id="post-photo-upload"
-            />
-            <button 
-              onClick={() => document.getElementById('post-photo-upload').click()}
-              style={{ 
-                padding: '0.5rem 1rem', 
-                border: '1px solid var(--border)', 
-                borderRadius: 'var(--radius)', 
-                background: 'transparent',
-                color: 'var(--text)',
-                cursor: 'pointer'
-              }}
-            >
-              上传图片
-            </button>
-            {newPostImage && (
-              <div style={{ marginTop: '1rem' }}>
-                <img 
-                  src={newPostImage} 
-                  alt="预览" 
-                  style={{ 
-                    maxWidth: '200px', 
-                    maxHeight: '200px', 
-                    border: '1px solid var(--border)', 
-                    borderRadius: 'var(--radius)'
-                  }} 
-                />
-              </div>
-            )}
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button 
-              onClick={handleCreatePost} 
-              className="post-button"
-              disabled={!newPost.trim()}
-            >
-              发布
-            </button>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
