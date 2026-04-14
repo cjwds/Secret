@@ -10,6 +10,11 @@ const Login = () => {
     email: '',
     password: ''
   });
+  const [errors, setErrors] = useState({
+    username: '',
+    email: '',
+    password: ''
+  });
   const [successMessage, setSuccessMessage] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   
@@ -38,15 +43,81 @@ const Login = () => {
     navigate(from, { replace: true });
   }
   
+  // 验证函数
+  const validateField = (name, value) => {
+    let error = '';
+    
+    switch (name) {
+      case 'username':
+        if (!value.trim()) {
+          error = '用户名不能为空';
+        } else if (value.length < 3 || value.length > 20) {
+          error = '用户名长度应在3-20个字符之间';
+        }
+        break;
+      case 'email':
+        if (!value.trim()) {
+          error = '邮箱不能为空';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = '请输入有效的邮箱地址';
+        }
+        break;
+      case 'password':
+        if (!value) {
+          error = '密码不能为空';
+        } else if (value.length < 6 || value.length > 12) {
+          error = '密码长度应在6-12个字符之间';
+        } else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,12}$/.test(value)) {
+          error = '密码至少包含字母和数字';
+        }
+        break;
+      default:
+        break;
+    }
+    
+    setErrors(prev => ({
+      ...prev,
+      [name]: error
+    }));
+    
+    return error === '';
+  };
+  
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // 实时验证
+    if (value.trim()) {
+      validateField(name, value);
+    } else {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+  
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    validateField(name, value);
   };
   
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // 验证所有字段
+    const isUsernameValid = isLogin || validateField('username', formData.username);
+    const isEmailValid = validateField('email', formData.email);
+    const isPasswordValid = validateField('password', formData.password);
+    
+    if (!isEmailValid || !isPasswordValid || (!isLogin && !isUsernameValid)) {
+      return;
+    }
+    
     if (isLogin) {
       dispatch(login({ email: formData.email, password: formData.password }))
         .unwrap()
@@ -79,6 +150,11 @@ const Login = () => {
       email: '',
       password: ''
     });
+    setErrors({
+      username: '',
+      email: '',
+      password: ''
+    });
     setSuccessMessage('');
     setShowSuccessModal(false);
   };
@@ -91,74 +167,110 @@ const Login = () => {
       email: '',
       password: ''
     });
+    setErrors({
+      username: '',
+      email: '',
+      password: ''
+    });
   };
   
   return (
     <div className="login-container">
-      <h1>{isLogin ? '登录' : '注册'}</h1>
-      {error && (
-        <div className="error-message">
-          {error}
-          <button onClick={() => dispatch(clearError())}>关闭</button>
+      <div className="form-wrapper">
+        <div className="form-header">
+          <h1>{isLogin ? '欢迎回来' : '创建账号'}</h1>
+          <p>{isLogin ? '登录您的账号' : '注册新账号'}</p>
         </div>
-      )}
-      <form onSubmit={handleSubmit}>
-        {!isLogin && (
-          <div className="form-group">
-            <label htmlFor="username">用户名</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              placeholder="请设置您的用户名"
-              style={{ color: '#f44336' }}
-              required
-            />
+        
+        {error && (
+          <div className="error-message">
+            {error}
+            <button onClick={() => dispatch(clearError())} className="error-close">×</button>
           </div>
         )}
-        <div className="form-group">
-          <label htmlFor="email">{isLogin ? '账户' : '邮箱'}</label>
-          <input
-            type={isLogin ? "text" : "email"}
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder={isLogin ? "请输入用户名或邮箱" : "请输入邮箱 请设置您的邮箱"}
-            style={{ color: '#f44336' }}
-            required
-          />
+        
+        <form onSubmit={handleSubmit} className="auth-form">
+          {!isLogin && (
+            <div className="form-group">
+              <label htmlFor="username">用户名</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="请设置您的用户名"
+                className={`form-input ${errors.username ? 'error' : ''}`}
+                required
+              />
+              {errors.username && (
+                <div className="error-text">{errors.username}</div>
+              )}
+            </div>
+          )}
+          
+          <div className="form-group">
+            <label htmlFor="email">{isLogin ? '账户' : '邮箱'}</label>
+            <input
+              type={isLogin ? "text" : "email"}
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              placeholder={isLogin ? "请输入用户名或邮箱" : "请输入您的邮箱地址"}
+              className={`form-input ${errors.email ? 'error' : ''}`}
+              required
+            />
+            {errors.email && (
+              <div className="error-text">{errors.email}</div>
+            )}
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="password">密码</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              placeholder={isLogin ? "请输入密码" : "请设置6-12位密码"}
+              className={`form-input ${errors.password ? 'error' : ''}`}
+              required
+            />
+            {errors.password && (
+              <div className="error-text">{errors.password}</div>
+            )}
+            {!isLogin && (
+              <div className="password-hint">密码至少包含字母和数字</div>
+            )}
+          </div>
+          
+          <button 
+            type="submit" 
+            disabled={isLoading} 
+            className="submit-button"
+          >
+            {isLoading ? (isLogin ? '登录中...' : '注册中...') : (isLogin ? '登录' : '注册')}
+          </button>
+        </form>
+        
+        <div className="form-toggle">
+          <p>{isLogin ? '还没有账号？' : '已有账号？'}</p>
+          <button onClick={toggleForm} className="toggle-button">
+            {isLogin ? '立即注册' : '立即登录'}
+          </button>
         </div>
-        <div className="form-group">
-          <label htmlFor="password">密码</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder={isLogin ? "请输入密码" : "请设置6-12位密码，至少包含字母，数字两种类型"}
-            style={{ color: '#f44336' }}
-            required
-          />
-        </div>
-        <button type="submit" disabled={isLoading} style={{ backgroundColor: '#3a506b', borderRadius: '8px', padding: '12px', fontSize: '16px', fontWeight: '600' }}>
-          {isLoading ? (isLogin ? '登录中...' : '注册中...') : (isLogin ? '登录' : '注册')}
-        </button>
-      </form>
-      <div className="form-toggle">
-        <p>{isLogin ? '还没有账号？' : '已有账号？'}</p>
-        <button onClick={toggleForm} className="toggle-button" style={{ border: '2px solid #3a506b', borderRadius: '25px', padding: '10px 20px' }}>
-          {isLogin ? '立即注册' : '立即登录'}
-        </button>
       </div>
       
       {/* 成功弹窗 */}
       {showSuccessModal && (
         <div className="modal-overlay">
           <div className="modal-content">
+            <div className="modal-icon">✓</div>
             <h2>{successMessage}</h2>
             <p>立即登录</p>
             <button onClick={handleModalClose} className="modal-button">
