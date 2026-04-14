@@ -112,6 +112,8 @@ const Login = () => {
               name="username"
               value={formData.username}
               onChange={handleChange}
+              placeholder="请设置您的用户名"
+              style={{ color: '#f44336' }}
               required
             />
           </div>
@@ -124,7 +126,8 @@ const Login = () => {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder={isLogin ? "请输入用户名或邮箱" : "请输入邮箱"}
+            placeholder={isLogin ? "请输入用户名或邮箱" : "请输入邮箱 请设置您的邮箱"}
+            style={{ color: '#f44336' }}
             required
           />
         </div>
@@ -136,16 +139,18 @@ const Login = () => {
             name="password"
             value={formData.password}
             onChange={handleChange}
+            placeholder={isLogin ? "请输入密码" : "请设置6-12位密码，至少包含字母，数字两种类型"}
+            style={{ color: '#f44336' }}
             required
           />
         </div>
-        <button type="submit" disabled={isLoading}>
+        <button type="submit" disabled={isLoading} style={{ backgroundColor: '#3a506b', borderRadius: '8px', padding: '12px', fontSize: '16px', fontWeight: '600' }}>
           {isLoading ? (isLogin ? '登录中...' : '注册中...') : (isLogin ? '登录' : '注册')}
         </button>
       </form>
       <div className="form-toggle">
         <p>{isLogin ? '还没有账号？' : '已有账号？'}</p>
-        <button onClick={toggleForm} className="toggle-button">
+        <button onClick={toggleForm} className="toggle-button" style={{ border: '2px solid #3a506b', borderRadius: '25px', padding: '10px 20px' }}>
           {isLogin ? '立即注册' : '立即登录'}
         </button>
       </div>
