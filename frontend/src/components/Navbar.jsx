@@ -25,7 +25,6 @@ const Navbar = () => {
           ) : (
             <>
               <Link to="/login" className="navbar-link">登录</Link>
-              <Link to="/register" className="navbar-link">注册</Link>
             </>
           )}
         </div>

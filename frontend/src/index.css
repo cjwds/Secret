@@ -311,6 +311,42 @@ button:disabled {
   box-shadow: none;
 }
 
+/* 表单切换 */
+.form-toggle {
+  margin-top: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-toggle p {
+  color: var(--text-light);
+  font-size: 14px;
+}
+
+.toggle-button {
+  width: auto;
+  display: inline-block;
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  padding: 8px 20px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 0;
+}
+
+.toggle-button:hover {
+  background-color: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
 /* 首页 */
 .home-container {
   max-width: 800px;

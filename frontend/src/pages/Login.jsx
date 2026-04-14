@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { login, clearError } from '../redux/authSlice';
+import { login, register, clearError } from '../redux/authSlice';
 
 const Login = () => {
+  const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
+    username: '',
     email: '',
     password: ''
   });
@@ -31,12 +33,25 @@ const Login = () => {
   
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(login(formData));
+    if (isLogin) {
+      dispatch(login({ email: formData.email, password: formData.password }));
+    } else {
+      dispatch(register(formData));
+    }
+  };
+  
+  const toggleForm = () => {
+    setIsLogin(!isLogin);
+    setFormData({
+      username: '',
+      email: '',
+      password: ''
+    });
   };
   
   return (
     <div className="login-container">
-      <h1>登录</h1>
+      <h1>{isLogin ? '登录' : '注册'}</h1>
       {error && (
         <div className="error-message">
           {error}
@@ -44,6 +59,19 @@ const Login = () => {
         </div>
       )}
       <form onSubmit={handleSubmit}>
+        {!isLogin && (
+          <div className="form-group">
+            <label htmlFor="username">用户名</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
+          </div>
+        )}
         <div className="form-group">
           <label htmlFor="email">邮箱</label>
           <input
@@ -67,10 +95,15 @@ const Login = () => {
           />
         </div>
         <button type="submit" disabled={isLoading}>
-          {isLoading ? '登录中...' : '登录'}
+          {isLoading ? (isLogin ? '登录中...' : '注册中...') : (isLogin ? '登录' : '注册')}
         </button>
       </form>
-      <p>还没有账号？<a href="/register">注册</a></p>
+      <div className="form-toggle">
+        <p>{isLogin ? '还没有账号？' : '已有账号？'}</p>
+        <button onClick={toggleForm} className="toggle-button">
+          {isLogin ? '立即注册' : '立即登录'}
+        </button>
+      </div>
     </div>
   );
 };
