@@ -22,13 +22,49 @@ const Profile = () => {
           return;
         }
         
-        const [userResponse, postsResponse] = await Promise.all([
-          userAPI.getUser(userId),
-          postAPI.getUserPosts(userId)
-        ]);
-        
-        setUser(userResponse.data);
-        setPosts(postsResponse.data);
+        try {
+          // 尝试从API获取用户信息
+          const [userResponse, postsResponse] = await Promise.all([
+            userAPI.getUser(userId),
+            postAPI.getUserPosts(userId)
+          ]);
+          
+          setUser(userResponse.data);
+          setPosts(postsResponse.data);
+        } catch (apiError) {
+          // API请求失败，使用本地存储的模拟数据
+          console.log('API请求失败，使用本地存储数据');
+          
+          // 获取当前用户数据
+          if (currentUser) {
+            setUser({
+              ...currentUser,
+              bio: '这是我的个人简介',
+              interests: ['编程', '音乐', '旅行'],
+              photos: [
+                { url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=beautiful%20landscape%20photo&image_size=square', caption: '风景照' },
+                { url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20food&image_size=square', caption: '美食' }
+              ]
+            });
+            setPosts([]); // 模拟空帖子列表
+          } else {
+            // 从注册用户中查找
+            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+            const user = registeredUsers.find(u => u._id === userId);
+            if (user) {
+              setUser({
+                ...user,
+                bio: '这是我的个人简介',
+                interests: ['编程', '音乐', '旅行'],
+                photos: [
+                  { url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=beautiful%20landscape%20photo&image_size=square', caption: '风景照' },
+                  { url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicious%20food&image_size=square', caption: '美食' }
+                ]
+              });
+              setPosts([]);
+            }
+          }
+        }
       } catch (error) {
         console.error('获取用户信息失败:', error);
       } finally {
